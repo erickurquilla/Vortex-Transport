@@ -18,9 +18,6 @@ std::vector<std::vector<double>> inverse_mass_matrix_reference_space(const int& 
     // second item runs over the evaluation of the lagrange poliniam in the quadrature points
     std::vector<std::vector<double>> phi_in_quadrature_points( ( p + 1 ) * ( p + 2 ) / 2 , std::vector<double>( size ) );
 
-    // initialize counter
-    int counter = 0;
-
     // evaluate the lagrange polinomial in the quadrature points
     for (int i = 0; i < size; ++i) {
 
@@ -32,9 +29,8 @@ std::vector<std::vector<double>> inverse_mass_matrix_reference_space(const int& 
 
         // evaluate the lagrange polinomial in the quadrature points
         for (int j = 0; j < ( p + 1 ) * ( p + 2 ) / 2; ++j) {
-            phi_in_quadrature_points[j][counter] = phi_in_xi_eta_gauss[j];
+            phi_in_quadrature_points[j][i] = phi_in_xi_eta_gauss[j];
         }
-        counter++;
     }
 
     // define mass matrix
@@ -62,10 +58,6 @@ std::vector<std::vector<double>> inverse_mass_matrix_reference_space(const int& 
     // Compute the inverse of the mass matrix using Eigen
     Eigen::MatrixXd inv_matrix = eigen_mass_matrix.inverse();
 
-    // Output mass matrix and its inverse
-    std::cout << "Mass matrix:" << std::endl << eigen_mass_matrix << std::endl;
-    std::cout << "Inverse mass matrix:" << std::endl << inv_matrix << std::endl;
-
     // Convert the inv_matrix to an vector matrix to return the right function type
     std::vector<std::vector<double>> mass_matrix_inverse( ( p + 1 ) * ( p + 2 ) / 2 , std::vector<double>( ( p + 1 ) * ( p + 2 ) / 2 ) );
     for (int i = 0; i <  ( p + 1 ) * ( p + 2 ) / 2 ; ++i) {
@@ -77,9 +69,7 @@ std::vector<std::vector<double>> inverse_mass_matrix_reference_space(const int& 
     // return inverse mass matrix
     // size ( p + 1 ) * ( p + 2 ) / 2 by ( p + 1 ) * ( p + 2 ) / 2
     return mass_matrix_inverse;
-
 }
-
 
 // compute stiffness matrix in reference space 
 // S_ij = integral in T of ( Nabla phi_i ) phi_j dT
@@ -138,17 +128,9 @@ std::vector<std::vector<std::vector<double>>> sitffness_matrix_reference_space(c
         }
     }
 
-    std::cout << " Stiffness matrix " << std::endl;        
-    for (int i = 0; i < ( p + 1 ) * ( p + 2 ) / 2; ++i) {
-        for (int j = 0; j < ( p + 1 ) * ( p + 2 ) / 2; ++j) {
-        std::cout << i << " , " << j << " : " << stiffness_matrix[0][i][j] << " x + " << stiffness_matrix[1][i][j] << " y " << std::endl;        
-        }
-    } 
-
     // return stiffness matrix
     // form :  hat{e}_xi * matrix[ ( p + 1 ) * ( p + 2 ) / 2 by ( p + 1 ) * ( p + 2 ) / 2 ] + hat{e}_eta * matrix[ ( p + 1 ) * ( p + 2 ) / 2 by ( p + 1 ) * ( p + 2 ) / 2 ]     
     // first index run between spacial components in reference space. 0: xi and 1 eta.
     // second and third index run over matrix inidices of size ( p + 1 ) * ( p + 2 ) / 2 by ( p + 1 ) * ( p + 2 ) / 2 ]
     return stiffness_matrix;
-
 }

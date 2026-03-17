@@ -35,6 +35,14 @@ std::vector<double> numerical_flux(const std::vector<double>& u_left, const std:
     if ( ( pL <= 0 ) || ( rL <=0 ) ){
         std::cerr << "1. Error: Non-physical state! " << std::endl;
         std::cout << " pL : "<< pL << " , rL : " << rL << ", not satified ( pL <= 0 ) || ( rL <=0 )" << std::endl;
+        std::cout << " u_left[0] = "<<  u_left[0] << std::endl;
+        std::cout << " u_left[1] = "<<  u_left[1] << std::endl;
+        std::cout << " u_left[2] = "<<  u_left[2] << std::endl;
+        std::cout << " u_left[3] = "<<  u_left[3] << std::endl;
+        std::cout << " u_right[0] = "<<  u_right[0] << std::endl;
+        std::cout << " u_right[1] = "<<  u_right[1] << std::endl;
+        std::cout << " u_right[2] = "<<  u_right[2] << std::endl;
+        std::cout << " u_right[3] = "<<  u_right[3] << std::endl;
         exit(EXIT_FAILURE);
     }
     

@@ -14,6 +14,8 @@ struct parameters{
     int number_time_steps;
     double time_step; 
     int write_every_steps; 
+    int U_initialization_type;
+    int stepping_method;
 };
 
 // this function reads the input parameter script and return an struct of the type parameters with all of them

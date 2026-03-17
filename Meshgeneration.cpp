@@ -44,11 +44,6 @@ mesh generate_mesh(const parameters& parms){
         }
     }
 
-    std::cout << "\nGrid coodinates information ( x , y )" << std::endl;
-    for (int i = 0; i < ( parms.num_element_in_x+1 ) * ( parms.num_element_in_y+1 ) ; ++i) {
-        std::cout << i <<" : ( " << allgridpoints_x[i] << " , " << allgridpoints_y[i] << " )"<< std::endl;
-    }
-
     // ..................................................................
     // Generate element to node information
     // ..................................................................
@@ -76,11 +71,6 @@ mesh generate_mesh(const parameters& parms){
         el_to_nod_3[i] = el_to_nod_2[(i % 2 == 0 ? i+1 : i-1)];
     }
 
-    std::cout << "\nElement to node information\nThe coordinates of the squere angle vertex is the first number (see below for the coodinates in the physical space)\nThe other indices represent the other vertices going counter clockwise" << std::endl;
-    for (int i = 0; i < 2 * parms.num_element_in_x * parms.num_element_in_y; ++i) {
-        std::cout << i << " : " << el_to_nod_1[i] << " , " << el_to_nod_2[i] << " , " << el_to_nod_3[i] << std::endl;
-    }
-
     // ..................................................................
     // Generate element type information
     // ..................................................................
@@ -89,11 +79,6 @@ mesh generate_mesh(const parameters& parms){
     std::vector<int> element_type(2 * parms.num_element_in_x * parms.num_element_in_y);
     for (int i = 0; i < 2 * parms.num_element_in_x * parms.num_element_in_y; ++i) {
         element_type[i] = (i % 2 == 0 ? 0 : 1);
-    }
-
-    std::cout << "\nElement type information\n0 represents an element with the square angle down\n1 represents an element with the squere angle up" << std::endl;
-    for (int i = 0; i < 2 * parms.num_element_in_x * parms.num_element_in_y; ++i) {
-        std::cout << i << " : " << element_type[i] << std::endl;
     }
 
     // ..................................................................
@@ -123,11 +108,6 @@ mesh generate_mesh(const parameters& parms){
     }
     for (int i = 2 * parms.num_element_in_x * ( parms.num_element_in_y - 1 ); i < 2 * parms.num_element_in_x * parms.num_element_in_y ; ++i){
         element_vertical[i] = ( i % 2 == 0 ?  i + 1 - 2 * parms.num_element_in_x : i - 1 - 2 * parms.num_element_in_x * ( parms.num_element_in_y - 1 ) );
-    }
-
-    std::cout << "\nElement boundaries\nFirst element in the element on the right\nSecond number is the element on the left\nThird number is the element in the vertical direction, down for even numbers and up for odd number" << std::endl;
-    for (int i = 0; i < 2 * parms.num_element_in_x * parms.num_element_in_y; ++i){
-        std::cout << i << " : " << element_right[i] << " , " << element_left[i] << " , " << element_vertical[i] << std::endl;
     }
 
     // ..................................................................
@@ -213,7 +193,6 @@ std::vector<std::vector<double>> generate_nodes_reference_space(const parameters
     }
 
     double size_between_nodes = 1.0 / parms.p ;
-    std::cout << "size_between_nodes " << size_between_nodes << std::endl;
 
     int counter = 0;
     if (parms.p > 0) {
@@ -227,11 +206,6 @@ std::vector<std::vector<double>> generate_nodes_reference_space(const parameters
                 }
             }
         }
-    }
-
-    std::cout << "\nInterior nodes in reference space ( xi , eta ) for p = " << parms.p << std::endl;
-    for (int i = 0; i < ( parms.p + 1 ) *( parms.p + 2 ) / 2 ; ++i) {
-        std::cout << i << " : ( " << ele_nod_ref_space[i][0] << " , " << ele_nod_ref_space[i][1] << " )" << std::endl;
     }
 
     return ele_nod_ref_space; // Contains the node coordinates in reference space, the first index in the node number, the second inxed runs between 0 and 1. 0: xi and 1: eta.

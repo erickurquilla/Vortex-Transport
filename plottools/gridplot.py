@@ -48,5 +48,5 @@ if __name__ == "__main__":
         x = [data[1],data[3],data[5],data[1]]
         y = [data[2],data[4],data[6],data[2]]
         ax.plot(x,y)
-    fig.savefig('plotttools/grid.pdf',bbox_inches='tight')
+    fig.savefig('plottools/grid.pdf',bbox_inches='tight')
     plt.clf()

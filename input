@@ -2,24 +2,34 @@
 p=3
 
 // physical domain
-domain_x=10 //cm
-domain_y=10 //cm
+domain_x=10.0 //cm
+domain_y=10.0 //cm
 
 // number of elements
-num_element_in_x=16
-num_element_in_y=16
+num_element_in_x=8
+num_element_in_y=8
 
 // grid perturbation parameter 
 perturb_grid=0
 
 // gauss integration
-integration_order=19
+integration_order=6
 
 // simulation time
-simulation_time=15
+simulation_time=14.14213562373
 
 // number of time steps
-number_time_steps=2000
+number_time_steps=10000
 
 // write data
-write_every_steps=25
+write_every_steps=250
+
+// initialization type of hidrodynamics state U
+// 0 : direct interpolation
+// 1 : least squere projection
+U_initialization_type=0
+
+// time stepping method
+// 0 : forward euler
+// 1 : rk4
+stepping_method=1
