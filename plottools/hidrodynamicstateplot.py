@@ -13,7 +13,7 @@ import matplotlib.tri as tri
 
 mpl.rcParams['font.size'] = 22
 mpl.rcParams['font.family'] = 'serif'
-mpl.rc('text', usetex=True)
+mpl.rc('text', usetex=False)
 mpl.rcParams['xtick.major.size'] = 7
 mpl.rcParams['xtick.major.width'] = 2
 mpl.rcParams['xtick.major.pad'] = 8
