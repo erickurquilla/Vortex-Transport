@@ -8,7 +8,9 @@
 PROFILE_DECLARE("numerical_flux");
 
 // compute numerical flux given the state vector u in the left and right and the normal vector
-std::vector<double> numerical_flux(const std::vector<double>& u_left, const std::vector<double>& u_right, const std::vector<double>& normal_vector){
+// the result is written into `flux` (size 4, preallocated by the caller) so that this
+// function performs no heap allocations: it runs once per quadrature point per side.
+void numerical_flux(const std::vector<double>& u_left, const std::vector<double>& u_right, const std::vector<double>& normal_vector, std::vector<double>& flux){
 
     PROFILE_SCOPE("numerical_flux");
 
@@ -55,8 +57,8 @@ std::vector<double> numerical_flux(const std::vector<double>& u_left, const std:
     double HL = rHL / rL;
     // double cL = pow( gamma * pL /rL , 0.5 );
 
-    // left flux
-    std::vector<double> FL(4);
+    // left flux (stack array: avoid per-call heap allocation)
+    double FL[4];
     FL[0] = rL * unL;
     FL[1] = u_left[1] * unL + pL * normal_vector[0];
     FL[2] = u_left[2] * unL + pL * normal_vector[1];
@@ -80,15 +82,15 @@ std::vector<double> numerical_flux(const std::vector<double>& u_left, const std:
     double HR = rHR / rR;
     // double cR = pow( gamma * pR / rR , 0.5 );
 
-    // right flux
-    std::vector<double> FR(4);
+    // right flux (stack array: avoid per-call heap allocation)
+    double FR[4];
     FR[0] = rR * unR;
     FR[1] = u_right[1] * unR + pR * normal_vector[0];
     FR[2] = u_right[2] * unR + pR * normal_vector[1];
     FR[3] = rHR * unR;
 
-    // difference in states
-    std::vector<double> du(4);
+    // difference in states (stack array: avoid per-call heap allocation)
+    double du[4];
     du[0] = u_right[0] - u_left[0];
     du[1] = u_right[1] - u_left[1];
     du[2] = u_right[2] - u_left[2];
@@ -117,7 +119,7 @@ std::vector<double> numerical_flux(const std::vector<double>& u_left, const std:
 
     // eigenvalues
     // z = zeros(3,1);
-    std::vector<double> l = {0,0,0};
+    double l[3];
     l[0] = ucp + ci ;
     l[1] = ucp - ci ;
     l[2] = ucp;
@@ -147,12 +149,9 @@ std::vector<double> numerical_flux(const std::vector<double>& u_left, const std:
     double C1 = G1 * (s1 - l3) * ci1 * ci1 + G2 * s2 * ci1;
     double C2 = G1 * s2 * ci1 + G2 * (s1 - l3);
 
-    // Flux assembly
-    std::vector<double> F(4);
-    F[0] = 0.5 * (FL[0] + FR[0]) - 0.5 * (l3 * du[0] + C1);
-    F[1] = 0.5 * (FL[1] + FR[1]) - 0.5 * (l3 * du[1] + C1 * ui + C2 * normal_vector[0]);
-    F[2] = 0.5 * (FL[2] + FR[2]) - 0.5 * (l3 * du[2] + C1 * vi + C2 * normal_vector[1]);
-    F[3] = 0.5 * (FL[3] + FR[3]) - 0.5 * (l3 * du[3] + C1 * Hi + C2 * ucp);
-
-    return F;
+    // Flux assembly: written in place into the caller's preallocated vector
+    flux[0] = 0.5 * (FL[0] + FR[0]) - 0.5 * (l3 * du[0] + C1);
+    flux[1] = 0.5 * (FL[1] + FR[1]) - 0.5 * (l3 * du[1] + C1 * ui + C2 * normal_vector[0]);
+    flux[2] = 0.5 * (FL[2] + FR[2]) - 0.5 * (l3 * du[2] + C1 * vi + C2 * normal_vector[1]);
+    flux[3] = 0.5 * (FL[3] + FR[3]) - 0.5 * (l3 * du[3] + C1 * Hi + C2 * ucp);
 }

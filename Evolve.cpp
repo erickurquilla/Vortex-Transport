@@ -214,9 +214,10 @@ void Evolve_element::compute_numerical_flux(){
     // loop over quadrature points
     for (int i = 0; i < number_quadrature_points; ++i) {
         // call the function numerical_flux in the Numericalflux.cpp file
-        numerical_flux_side_1[i]  = numerical_flux(U_plus_side_1[i], U_minus_side_1[i], this->element_this->units_vectors_perpendicular_to_element_boundary[0]);
-        numerical_flux_side_2[i]  = numerical_flux(U_plus_side_2[i], U_minus_side_2[i], this->element_this->units_vectors_perpendicular_to_element_boundary[1]);
-        numerical_flux_side_3[i]  = numerical_flux(U_plus_side_3[i], U_minus_side_3[i], this->element_this->units_vectors_perpendicular_to_element_boundary[2]);
+        // the result is written in place into the preallocated numerical_flux_side_* vectors
+        numerical_flux(U_plus_side_1[i], U_minus_side_1[i], this->element_this->units_vectors_perpendicular_to_element_boundary[0], numerical_flux_side_1[i]);
+        numerical_flux(U_plus_side_2[i], U_minus_side_2[i], this->element_this->units_vectors_perpendicular_to_element_boundary[1], numerical_flux_side_2[i]);
+        numerical_flux(U_plus_side_3[i], U_minus_side_3[i], this->element_this->units_vectors_perpendicular_to_element_boundary[2], numerical_flux_side_3[i]);
     }
 }
 
