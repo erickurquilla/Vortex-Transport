@@ -1,0 +1,159 @@
+using perf: /usr/lib/linux-tools/6.8.0-136-generic/perf (perf version 6.8.12)
+recording: /usr/lib/linux-tools/6.8.0-136-generic/perf record -g -F 499 -o perf.data -- ./Vortex-Transport-prof input
+git commit: 88dbe799f066
+Step : 250
+Step : 500
+Step : 750
+Step : 1000
+Step : 1250
+Step : 1500
+Step : 1750
+Step : 2000
+Step : 2250
+Step : 2500
+Step : 2750
+Step : 3000
+Step : 3250
+Step : 3500
+Step : 3750
+Step : 4000
+Step : 4250
+Step : 4500
+Step : 4750
+Step : 5000
+Step : 5250
+Step : 5500
+Step : 5750
+Step : 6000
+Step : 6250
+Step : 6500
+Step : 6750
+Step : 7000
+Step : 7250
+Step : 7500
+Step : 7750
+Step : 8000
+Step : 8250
+Step : 8500
+Step : 8750
+Step : 9000
+Step : 9250
+Step : 9500
+Step : 9750
+Step : 10000
+
+======================== ENABLE_TIMERS profiling summary ========================
+wall time: 33.235 s
+peak memory: VmHWM:	    7352 kB | VmPeak:	    9664 kB
+
+--- by SELF time (exclusive; where CPU time is actually spent) ---
+function                                           calls    self (s)   self %    incl (s)   incl %  avg self (ms)
+--------------------------------------------------------------------------------------------------------------
+numerical_flux                                  61440000      10.956    32.96      10.956    32.96       0.000178
+Evolve_element::compute_U_plus_minus             5120000       5.777    17.38       5.777    17.38       0.001128
+rk4                                                10000       4.076    12.27      32.349    97.33       0.407639
+Evolve_element::compute_numerical_flux           5120000       3.148     9.47      14.103    42.44       0.000615
+Evolve_element::integrate_numerical_flux         5120000       2.698     8.12       2.698     8.12       0.000527
+Evolve_element::compute_stiffness_vector         5120000       2.496     7.51       2.496     7.51       0.000488
+Evolve_element::compute_time_derivative_U        5120000       1.767     5.32       1.767     5.32       0.000345
+evolve_elem                                        40000       1.166     3.51      28.272    85.07       0.029154
+clean_create_directory                                43       0.469     1.41       0.469     1.41      10.906290
+Evolve_element::compute_residual_vector          5120000       0.264     0.80       0.264     0.80       0.000052
+writeToFile                                         5504       0.237     0.71       0.237     0.71       0.043114
+Element::write_data                                 5248       0.170     0.51       0.389     1.17       0.032302
+main                                                   1       0.008     0.02      33.235   100.00       7.786330
+generate_mesh                                          1       0.001     0.00       0.050     0.15       1.415862
+read_input_files                                       1       0.000     0.00       0.000     0.00       0.449087
+lagrange_basis_reference_space                      4376       0.000     0.00       0.000     0.00       0.000046
+Evolve_element::evaluate_basis_in_quadrature_poits        128       0.000     0.00       0.000     0.00       0.001507
+reference_to_physical_space                         1280       0.000     0.00       0.000     0.00       0.000090
+Element::initialize_hydrodinamics                    128       0.000     0.00       0.000     0.00       0.000855
+Element::build_jacobians                             128       0.000     0.00       0.000     0.00       0.000573
+Element::Element (ctor)                              128       0.000     0.00       0.000     0.00       0.000570
+Element::build_stiffness_matrix                      128       0.000     0.00       0.000     0.00       0.000285
+Element::build_mass_matrix_inverse                   128       0.000     0.00       0.000     0.00       0.000243
+inverse_mass_matrix_reference_space                    1       0.000     0.00       0.000     0.00       0.029857
+sitffness_matrix_reference_space                       1       0.000     0.00       0.000     0.00       0.021306
+Element::Element (default ctor)                      128       0.000     0.00       0.000     0.00       0.000052
+Evolve_element::Evolve_element (ctor)                128       0.000     0.00       0.000     0.00       0.000029
+lagrange_basis_gradient_reference_space               12       0.000     0.00       0.000     0.00       0.000293
+Evolve_element::Evolve_element (default ctor)        128       0.000     0.00       0.000     0.00       0.000023
+gauss_area_integral                                    1       0.000     0.00       0.000     0.00       0.002751
+gauss_line_integral                                    1       0.000     0.00       0.000     0.00       0.001251
+generate_nodes_reference_space                         1       0.000     0.00       0.000     0.00       0.001065
+forward_euler                                          0       0.000     0.00       0.000     0.00       0.000000
+
+--- by INCLUSIVE time (children included; which code path is expensive) ---
+function                                           calls    incl (s)   incl %    self (s)   self % min/call (ms) max/call (ms)
+--------------------------------------------------------------------------------------------------------------
+main                                                   1      33.235   100.00       0.008     0.02  33235.196593  33235.196593
+rk4                                                10000      32.349    97.33       4.076    12.27      2.807186     13.650153
+evolve_elem                                        40000      28.272    85.07       1.166     3.51      0.612899      9.717062
+Evolve_element::compute_numerical_flux           5120000      14.103    42.44       3.148     9.47      0.002327      8.712284
+numerical_flux                                  61440000      10.956    32.96      10.956    32.96      0.000149      8.168720
+Evolve_element::compute_U_plus_minus             5120000       5.777    17.38       5.777    17.38      0.000879      4.075820
+Evolve_element::integrate_numerical_flux         5120000       2.698     8.12       2.698     8.12      0.000441      1.045295
+Evolve_element::compute_stiffness_vector         5120000       2.496     7.51       2.496     7.51      0.000362      0.884166
+Evolve_element::compute_time_derivative_U        5120000       1.767     5.32       1.767     5.32      0.000279      0.937983
+clean_create_directory                                43       0.469     1.41       0.469     1.41      3.754009    235.274763
+Element::write_data                                 5248       0.389     1.17       0.170     0.51      0.037454      7.831693
+Evolve_element::compute_residual_vector          5120000       0.264     0.80       0.264     0.80      0.000036      0.808641
+writeToFile                                         5504       0.237     0.71       0.237     0.71      0.012843      7.805672
+generate_mesh                                          1       0.050     0.15       0.001     0.00     49.568635     49.568635
+read_input_files                                       1       0.000     0.00       0.000     0.00      0.449087      0.449087
+Evolve_element::evaluate_basis_in_quadrature_poits        128       0.000     0.00       0.000     0.00      0.002316      0.003736
+Element::Element (ctor)                              128       0.000     0.00       0.000     0.00      0.001398      0.004237
+lagrange_basis_reference_space                      4376       0.000     0.00       0.000     0.00      0.000031      0.000322
+reference_to_physical_space                         1280       0.000     0.00       0.000     0.00      0.000095      0.000607
+Element::initialize_hydrodinamics                    128       0.000     0.00       0.000     0.00      0.000504      0.002111
+Element::build_jacobians                             128       0.000     0.00       0.000     0.00      0.000172      0.017866
+Element::build_stiffness_matrix                      128       0.000     0.00       0.000     0.00      0.000188      0.000920
+Element::build_mass_matrix_inverse                   128       0.000     0.00       0.000     0.00      0.000157      0.000726
+inverse_mass_matrix_reference_space                    1       0.000     0.00       0.000     0.00      0.031006      0.031006
+sitffness_matrix_reference_space                       1       0.000     0.00       0.000     0.00      0.025721      0.025721
+Element::Element (default ctor)                      128       0.000     0.00       0.000     0.00      0.000047      0.000072
+Evolve_element::Evolve_element (ctor)                128       0.000     0.00       0.000     0.00      0.000021      0.000044
+lagrange_basis_gradient_reference_space               12       0.000     0.00       0.000     0.00      0.000244      0.000575
+Evolve_element::Evolve_element (default ctor)        128       0.000     0.00       0.000     0.00      0.000021      0.000031
+gauss_area_integral                                    1       0.000     0.00       0.000     0.00      0.002751      0.002751
+gauss_line_integral                                    1       0.000     0.00       0.000     0.00      0.001251      0.001251
+generate_nodes_reference_space                         1       0.000     0.00       0.000     0.00      0.001065      0.001065
+forward_euler                                          0       0.000     0.00       0.000     0.00      0.000000      0.000000
+==================================================================================
+[ perf record: Woken up 7 times to write data ]
+[ perf record: Captured and wrote 2.018 MB perf.data (16441 samples) ]
+
+wrote perf_report.txt (top of the report below)
+for the interactive view run: /usr/lib/linux-tools/6.8.0-136-generic/perf report -i perf.data
+----------------------------------------------------------------------
+    99.37%     0.00%  Vortex-Transpor  Vortex-Transport-prof  [.] _start
+            |
+            ---_start
+               __libc_start_main
+               0x72b6f642a1ca
+               main
+               |          
+               |--97.85%--rk4(Element*, Evolve_element*, double&, int const&)
+               |          |          
+               |          |--85.50%--evolve_elem(Evolve_element*, int)
+               |          |          |          
+               |          |          |--42.98%--Evolve_element::compute_numerical_flux()
+               |          |          |          |          
+               |          |          |          |--37.75%--numerical_flux(std::vector<double, std::allocator<double> > const&, std::vector<double, std::allocator<double> > const&, std::vector<double, std::allocator<double> > const&)
+               |          |          |          |          |          
+               |          |          |          |          |--8.13%--std::chrono::_V2::steady_clock::now()
+               |          |          |          |          |          |          
+               |          |          |          |          |           --7.82%--clock_gettime
+               |          |          |          |          |                     |          
+               |          |          |          |          |                      --7.72%--__vdso_clock_gettime
+               |          |          |          |          |          
+               |          |          |          |          |--2.71%--operator new(unsigned long)
+               |          |          |          |          |          |          
+               |          |          |          |          |           --1.93%--malloc
+               |          |          |          |          |          
+----------------------------------------------------------------------
+no flamegraph tool found, skipping flamegraph.svg
+  install one with:  cargo install inferno
+  or clone https://github.com/brendangregg/FlameGraph and add it to PATH
+
+done. artifacts: perf.data, perf_report.txt
