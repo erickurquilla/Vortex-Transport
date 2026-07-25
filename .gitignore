@@ -1,9 +1,15 @@
 # generated files
 Vortex-Transport
+Vortex-Transport-prof
 grid
 plottools/*.pdf
 output
 plottools/*.mp4
+
+# profiling artifacts
+perf.data*
+perf_report.txt
+flamegraph.svg
 
 # Prerequisites
 *.d

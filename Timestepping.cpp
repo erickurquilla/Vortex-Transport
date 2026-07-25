@@ -4,9 +4,11 @@
 
 #include "Element.H"
 #include "Evolve.H"
+#include "Profiling.H"
 
 // Compute dynamical quantites of the DG method
 void evolve_elem(Evolve_element* evo_elemts, int n_elements) {
+    PROFILE_SCOPE("evolve_elem");
     // Compute require quantities for time evolution
     for (int n = 0; n < n_elements ; ++n) {
         evo_elemts[n].compute_U_plus_minus();      // compute U on the element boundaries
@@ -20,6 +22,8 @@ void evolve_elem(Evolve_element* evo_elemts, int n_elements) {
 
 // time stepping with forward euler
 void forward_euler(Element* elemts, Evolve_element* evo_elemts, double& t_step, const int& n_elements){
+
+    PROFILE_SCOPE("forward_euler");
 
     // Compute require quantities for time evolution
     evolve_elem(evo_elemts, n_elements);
@@ -64,6 +68,8 @@ void forward_euler(Element* elemts, Evolve_element* evo_elemts, double& t_step, 
 
 // time stepping with rk4
 void rk4(Element* elemts, Evolve_element* evo_elemts, double& t_step, const int& n_elements){
+
+    PROFILE_SCOPE("rk4");
 
     // RK4 vector k1, k1, k3 and k4
     // The first index runs over elements

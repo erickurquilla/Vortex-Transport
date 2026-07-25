@@ -7,6 +7,7 @@
 #include "Evolve.H"
 #include "Lagrangebasis.H"
 #include "Numericalflux.H"
+#include "Profiling.H"
 
 Evolve_element::Evolve_element() {}
 
@@ -119,6 +120,8 @@ void Evolve_element::evaluate_basis_in_quadrature_poits(){
 // this function compute the hidrodynamic vector U on the element boundaries, side 1, 2 and 3. 
 void Evolve_element::compute_U_plus_minus(){
 
+    PROFILE_SCOPE("Evolve_element::compute_U_plus_minus");
+
     // number of quadrature points
     int number_quadrature_points = this->gau_integ_line.size();
 
@@ -189,6 +192,8 @@ void Evolve_element::compute_U_plus_minus(){
 // this function compute the numerical flux on the element boundaries, side 1, 2 and 3. 
 void Evolve_element::compute_numerical_flux(){
 
+    PROFILE_SCOPE("Evolve_element::compute_numerical_flux");
+
     // number of quadrature points
     int number_quadrature_points = this->gau_integ_line.size();
 
@@ -203,6 +208,8 @@ void Evolve_element::compute_numerical_flux(){
 
 // this function create the DG vector that results from the integration of the numerical flux ( integral phi_i hat_{F} dl )
 void Evolve_element::integrate_numerical_flux(){
+
+    PROFILE_SCOPE("Evolve_element::integrate_numerical_flux");
 
     // number of quadrature points
     int number_quadrature_points = this->gau_integ_line.size();
@@ -230,6 +237,7 @@ void Evolve_element::integrate_numerical_flux(){
 
 // compute stiffness vector (area integral over element of nabla phi_i dot F dOmega)
 void Evolve_element::compute_stiffness_vector(){
+    PROFILE_SCOPE("Evolve_element::compute_stiffness_vector");
     // loop over all the interior nodes of this element
     for (int i = 0; i < ( this->p + 1 ) * ( this->p + 2 ) / 2; ++i) {
         // loop over hidrodynamics indices
@@ -250,6 +258,7 @@ void Evolve_element::compute_stiffness_vector(){
 
 // compute  residual vector: DG vector that results from stiffness vector minus vector result of the numerical flux integration
 void Evolve_element::compute_residual_vector(){
+    PROFILE_SCOPE("Evolve_element::compute_residual_vector");
     // compute DG_residual_vector[i][j]
     // loop over all the interior nodes of this element
     for (int i = 0; i < ( this->p + 1 ) * ( this->p + 2 ) / 2; ++i) {
@@ -264,6 +273,7 @@ void Evolve_element::compute_residual_vector(){
 
 // compute residial vector stiffness vector minus vector result of the numerical flux integration
 void Evolve_element::compute_time_derivative_U(){
+    PROFILE_SCOPE("Evolve_element::compute_time_derivative_U");
     // compute DG_time_derivative_U[i][j]
     // loop over all the interior nodes of this element
     for (int i = 0; i < ( this->p + 1 ) * ( this->p + 2 ) / 2; ++i) {

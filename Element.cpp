@@ -6,6 +6,7 @@
 #include "Element.H"
 #include "Lagrangebasis.H"
 #include "Utilities.H"
+#include "Profiling.H"
 
 Element::Element() {}
 
@@ -317,6 +318,8 @@ void Element::initialize_hydrodinamics(const int& ini_type, const std::vector<st
 
 // write element data in output directory
 void Element::write_data(const int& step_num){
+
+    PROFILE_SCOPE("Element::write_data");
 
     // prepare data to be saved
     std::vector<std::string> lines( 1 + ( this->p + 1 ) *( this->p + 2 ) / 2 );
