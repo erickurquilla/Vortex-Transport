@@ -3,9 +3,14 @@
 #include <cmath>
 
 #include "Numericalflux.H"
+#include "Profiling.H"
+
+PROFILE_DECLARE("numerical_flux");
 
 // compute numerical flux given the state vector u in the left and right and the normal vector
 std::vector<double> numerical_flux(const std::vector<double>& u_left, const std::vector<double>& u_right, const std::vector<double>& normal_vector){
+
+    PROFILE_SCOPE("numerical_flux");
 
     // function [F, smag] = flux(UL, UR, n)
     // % PURPOSE: This function calculates the flux for the Euler equations

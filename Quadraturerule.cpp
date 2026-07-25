@@ -4,9 +4,15 @@
 #include <iostream>
 
 #include "Quadraturerule.H"
+#include "Profiling.H"
+
+PROFILE_DECLARE("gauss_line_integral");
+PROFILE_DECLARE("gauss_area_integral");
 
 // return gauss quadrature information for line integral, first index in the gauss quadrature coordinate number, second index runs from 0 to 1. 0 is xi coordinate. 1 is weight.
 std::vector<std::vector<double>> gauss_line_integral(const int& IntOrder){
+
+  PROFILE_SCOPE("gauss_line_integral");
 
   // Order 1 Legendre-Gauss Points
   int n1 = 1;
@@ -175,6 +181,8 @@ std::vector<std::vector<double>> gauss_line_integral(const int& IntOrder){
 }
 
 std::vector<std::vector<double>> gauss_area_integral(const int& IntOrder){
+
+  PROFILE_SCOPE("gauss_area_integral");
 
  /*
     Dunavant points generated with .m code written by John Burkard

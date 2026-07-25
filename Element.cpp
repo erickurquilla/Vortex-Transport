@@ -8,7 +8,15 @@
 #include "Utilities.H"
 #include "Profiling.H"
 
-Element::Element() {}
+PROFILE_DECLARE("Element::Element (default ctor)");
+PROFILE_DECLARE("Element::Element (ctor)");
+PROFILE_DECLARE("Element::build_jacobians");
+PROFILE_DECLARE("Element::build_mass_matrix_inverse");
+PROFILE_DECLARE("Element::build_stiffness_matrix");
+PROFILE_DECLARE("Element::initialize_hydrodinamics");
+PROFILE_DECLARE("Element::write_data");
+
+Element::Element() { PROFILE_SCOPE("Element::Element (default ctor)"); }
 
 Element::Element(const int& ele_num, const mesh& mesh_info, const std::vector<std::vector<double>>& nods_ref_spa, const int& p_lagrange):
     
@@ -33,7 +41,9 @@ Element::Element(const int& ele_num, const mesh& mesh_info, const std::vector<st
     sides_lenght(3) // contains the element side lenghts, this array contains just three values. 0: side 1, 1: side 2, 2: side 3
 
     {
-    
+
+    PROFILE_SCOPE("Element::Element (ctor)");
+
     // compute interior nodes coordinate in physical space
     for (int i = 0; i < ( this->p + 1 ) *( this->p + 2 ) / 2 ; ++i) {
         this->nods_coords_phys_space[i] = reference_to_physical_space(this->nods_coords_refe_space[i], this->vertices_coords_phys_space);
@@ -42,6 +52,8 @@ Element::Element(const int& ele_num, const mesh& mesh_info, const std::vector<st
 
 // compute jacobians to connetc referece space to physical space and viceversa for each element
 void Element::build_jacobians(){
+
+    PROFILE_SCOPE("Element::build_jacobians");
 
     // compute jacobian between transformation from reference space to physical space d vec{x} / d vec{xi} = [ [ x2 - x1 , x3 - x1 ] , [ y2 - y1 , y3 - y1 ] ] 
     this->jacobian[0][0] = this->vertices_coords_phys_space[1][0] - this->vertices_coords_phys_space[0][0];
@@ -82,6 +94,7 @@ void Element::build_jacobians(){
 
 // builds mass matrix inverse from referece space to physical space for each element
 void Element::build_mass_matrix_inverse(const std::vector<std::vector<double>>& inv_mass_matrix){
+    PROFILE_SCOPE("Element::build_mass_matrix_inverse");
     // compute inverse mass matrix in physical space
     for (int i = 0; i < (this->p + 1) * (this->p + 2) / 2; ++i) {
         for (int j = 0; j < (this->p + 1) * (this->p + 2) / 2; ++j) {
@@ -92,6 +105,7 @@ void Element::build_mass_matrix_inverse(const std::vector<std::vector<double>>& 
 
 // builds stiffness matrix from referece space to physical space for each element
 void Element::build_stiffness_matrix(const std::vector<std::vector<std::vector<double>>>& stiff_matrix){
+    PROFILE_SCOPE("Element::build_stiffness_matrix");
     // compute stiffness matrix in physical space 
     for (int i = 0; i < (this->p + 1) * (this->p + 2) / 2; ++i) {
         for (int j = 0; j < (this->p + 1) * (this->p + 2) / 2; ++j) {
@@ -103,6 +117,8 @@ void Element::build_stiffness_matrix(const std::vector<std::vector<std::vector<d
 
 // initialize the hydronimics quantities U and F
 void Element::initialize_hydrodinamics(const int& ini_type, const std::vector<std::vector<double>>& gau_area_int){
+
+    PROFILE_SCOPE("Element::initialize_hydrodinamics");
     // initialization type of hidrodynamics state U
     // 0 : direct interpolation
     if ( ini_type == 0 ){

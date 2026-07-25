@@ -6,6 +6,10 @@
 #include "Evolve.H"
 #include "Profiling.H"
 
+PROFILE_DECLARE("evolve_elem");
+PROFILE_DECLARE("forward_euler");
+PROFILE_DECLARE("rk4");
+
 // Compute dynamical quantites of the DG method
 void evolve_elem(Evolve_element* evo_elemts, int n_elements) {
     PROFILE_SCOPE("evolve_elem");

@@ -49,10 +49,10 @@ For detailed heap analysis beyond peak RSS, `valgrind --tool=massif` is the righ
 ### 3. Interpreting the output
 
 - **perf report / flamegraph** — statistical samples of where CPU time is spent, including code you did not instrument (e.g. `numerical_flux`, `libm`, allocator). Use the flamegraph for the big picture, `perf report` (and `perf annotate`) to drill into a specific function. This is the primary tool for deciding what to parallelize.
-- **Timing table** — the profiling binary prints a table to stderr at exit: function name, call count, total seconds, and % of wall time, for the instrumented functions (the DG kernels in `Evolve.cpp`, the time steppers in `Timestepping.cpp`, and `Element::write_data`). These are exact inclusive wall times, useful for before/after comparisons when optimizing. Nested timers overlap (`rk4` contains `evolve_elem`, which contains the `compute_*` kernels), so percentages do not sum to 100.
+- **Timing table** — the profiling binary prints a table to stderr at exit: function name, call count, total seconds, and % of wall time. Every function in the codebase is instrumented; functions that were never called still appear with 0 calls and 0%. These are exact inclusive wall times, useful for before/after comparisons when optimizing. Nested timers overlap (`rk4` contains `evolve_elem`, which contains the `compute_*` kernels), so percentages do not sum to 100. For very hot micro-functions (e.g. `numerical_flux`, millions of calls) the timer itself adds some overhead — trust perf for those.
 - **Peak memory** — the same summary reports `VmHWM` (peak resident set size) and `VmPeak` (peak virtual memory) read from `/proc/self/status`.
 
-To instrument additional functions, add `PROFILE_SCOPE("name");` at the top of the function (include `Profiling.H`). The macro compiles to nothing in the default build.
+To instrument a new function, add `PROFILE_SCOPE("name");` at the top of the function body and `PROFILE_DECLARE("name");` at file scope (the declare makes the name show up in the table even when the function is never called). Both macros compile to nothing in the default build; see `Profiling.H`.
 
 ## Post-processing
 

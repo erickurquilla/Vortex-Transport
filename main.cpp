@@ -9,8 +9,13 @@
 #include "Preevolve.H"
 #include "Evolve.H"
 #include "Timestepping.H"
+#include "Profiling.H"
+
+PROFILE_DECLARE("main");
 
 int main(int argc, char* argv[]) {
+
+    PROFILE_SCOPE("main");
     
     // read simulation paramaters
     parameters parms = read_input_files(argc, argv);

@@ -9,7 +9,17 @@
 #include "Numericalflux.H"
 #include "Profiling.H"
 
-Evolve_element::Evolve_element() {}
+PROFILE_DECLARE("Evolve_element::Evolve_element (default ctor)");
+PROFILE_DECLARE("Evolve_element::Evolve_element (ctor)");
+PROFILE_DECLARE("Evolve_element::evaluate_basis_in_quadrature_poits");
+PROFILE_DECLARE("Evolve_element::compute_U_plus_minus");
+PROFILE_DECLARE("Evolve_element::compute_numerical_flux");
+PROFILE_DECLARE("Evolve_element::integrate_numerical_flux");
+PROFILE_DECLARE("Evolve_element::compute_stiffness_vector");
+PROFILE_DECLARE("Evolve_element::compute_residual_vector");
+PROFILE_DECLARE("Evolve_element::compute_time_derivative_U");
+
+Evolve_element::Evolve_element() { PROFILE_SCOPE("Evolve_element::Evolve_element (default ctor)"); }
 
 Evolve_element::Evolve_element(Element* this_elem, Element* right_elem, Element* left_elem, Element* vertical_elem, const std::vector<std::vector<double>>& gau_int_l, const int& p_parms):
     
@@ -58,10 +68,14 @@ Evolve_element::Evolve_element(Element* this_elem, Element* right_elem, Element*
 
     {
 
+    PROFILE_SCOPE("Evolve_element::Evolve_element (ctor)");
+
 }
 
 // this function evaluate lagrande polinomials in the gauss quadrature at the element boundaries
 void Evolve_element::evaluate_basis_in_quadrature_poits(){
+
+    PROFILE_SCOPE("Evolve_element::evaluate_basis_in_quadrature_poits");
 
     // number of quadrature points
     int number_quadrature_points = this->gau_integ_line.size(); 

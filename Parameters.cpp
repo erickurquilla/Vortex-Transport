@@ -4,9 +4,15 @@
 #include <unordered_map>
 
 #include "Parameters.H"
+#include "Profiling.H"
+
+PROFILE_DECLARE("read_input_files");
 
 // this function reads the input parameter script and return an struct of the type parameters with all of them
 parameters read_input_files(int argc, char* argv[]) {
+
+    PROFILE_SCOPE("read_input_files");
+
     // Check if input file is provided as a command-line argument
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " <input_file>" << std::endl;

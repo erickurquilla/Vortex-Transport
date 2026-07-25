@@ -4,9 +4,14 @@
 #include <vector>
 
 #include "Utilities.H"
+#include "Profiling.H"
+
+PROFILE_DECLARE("writeToFile");
+PROFILE_DECLARE("clean_create_directory");
 
 // write an text file with name filemane, the data is given by an string array named line, each element of the array will be a line
 void writeToFile(const std::string& filename, const std::vector<std::string>& lines) {
+    PROFILE_SCOPE("writeToFile");
     // Open the file for writing
     std::ofstream outfile(filename);
 
@@ -26,6 +31,8 @@ void writeToFile(const std::string& filename, const std::vector<std::string>& li
 }
 
 void clean_create_directory(const std::string& dirname){
+
+    PROFILE_SCOPE("clean_create_directory");
 
     // Clean directory
     std::string dirPath = dirname;

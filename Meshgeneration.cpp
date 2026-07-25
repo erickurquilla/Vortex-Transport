@@ -8,8 +8,14 @@
 
 #include "Meshgeneration.H"
 #include "Utilities.H"
+#include "Profiling.H"
+
+PROFILE_DECLARE("generate_mesh");
+PROFILE_DECLARE("generate_nodes_reference_space");
 
 mesh generate_mesh(const parameters& parms){
+
+    PROFILE_SCOPE("generate_mesh");
 
     // ..................................................................
     // Generate x and y coordinates of the grid on the grid boundary
@@ -180,6 +186,8 @@ mesh generate_mesh(const parameters& parms){
 }
 
 std::vector<std::vector<double>> generate_nodes_reference_space(const parameters& parms){
+
+    PROFILE_SCOPE("generate_nodes_reference_space");
 
     // ..................................................................
     // Element nodes in reference space xi

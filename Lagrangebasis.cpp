@@ -2,9 +2,16 @@
 #include <iostream>
 
 #include "Lagrangebasis.H"
+#include "Profiling.H"
+
+PROFILE_DECLARE("lagrange_basis_reference_space");
+PROFILE_DECLARE("lagrange_basis_gradient_reference_space");
+PROFILE_DECLARE("reference_to_physical_space");
 
 // compute the lagrange basis function in reference space ( xi , eta )
 std::vector<double> lagrange_basis_reference_space(const int& p, const std::vector<double>& coords_ref_spa){
+
+    PROFILE_SCOPE("lagrange_basis_reference_space");
 
     // coordinates in reference space ( xi , eta )
     double xi, eta;
@@ -57,6 +64,8 @@ std::vector<double> lagrange_basis_reference_space(const int& p, const std::vect
 
 // compute the gradiente of the lagrange basis function in reference space ( xi , eta )
 std::vector<std::vector<double>> lagrange_basis_gradient_reference_space(const int& p, const std::vector<double>& coords_ref_spa){
+
+    PROFILE_SCOPE("lagrange_basis_gradient_reference_space");
 
     // coordinates in reference space ( xi , eta )
     double xi, eta;
@@ -139,6 +148,8 @@ std::vector<std::vector<double>> lagrange_basis_gradient_reference_space(const i
 
 // compute coordinates in physical space given ( xi , eta ) in reference space
 std::vector<double> reference_to_physical_space(const std::vector<double>& coord_ref_spa, const std::vector<std::vector<double>>& vertex_phys_spa){
+
+    PROFILE_SCOPE("reference_to_physical_space");
 
     // phi( xhi , eta )
     std::vector<double> phi = lagrange_basis_reference_space(1, coord_ref_spa);
