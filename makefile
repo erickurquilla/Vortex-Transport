@@ -13,8 +13,9 @@ LDFLAGS = -I/usr/include/eigen3
 #   -g                      debug symbols so perf can resolve names
 #   -fno-omit-frame-pointer accurate perf call stacks with `perf record -g`
 #   -DENABLE_TIMERS         enable the Profiling.H timing/memory summary
+#   -pthread                thread support for the (thread-safe) timers
 # ------------------------------------------------------------------
-PROFILE_FLAGS = -O2 -g -fno-omit-frame-pointer -DENABLE_TIMERS
+PROFILE_FLAGS = -O2 -g -fno-omit-frame-pointer -DENABLE_TIMERS -pthread
 
 SRCS = main.cpp Parameters.cpp Utilities.cpp Meshgeneration.cpp Element.cpp Lagrangebasis.cpp Quadraturerule.cpp Preevolve.cpp Evolve.cpp Numericalflux.cpp Timestepping.cpp
 OBJS = $(SRCS:.cpp=.o)
@@ -32,10 +33,13 @@ $(EXEC): $(OBJS)
 $(PROF_EXEC): $(PROF_OBJS)
 	$(CC) $(CFLAGS) $(PROFILE_FLAGS) $(LDFLAGS) $^ $(LIBS) -o $@
 
-%.o: %.cpp
+# objects also depend on the headers so edits to any .H trigger a rebuild
+HDRS = $(wildcard *.H)
+
+%.o: %.cpp $(HDRS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -c $< -o $@
 
-%.prof.o: %.cpp
+%.prof.o: %.cpp $(HDRS)
 	$(CC) $(CFLAGS) $(PROFILE_FLAGS) $(LDFLAGS) -c $< -o $@
 
 .PHONY: profile clean
