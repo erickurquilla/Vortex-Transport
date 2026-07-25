@@ -3,6 +3,13 @@ CFLAGS = -std=c++11 -Wall
 LDFLAGS = -I/usr/include/eigen3
 
 # ------------------------------------------------------------------
+# Git commit hash baked into the binary at compile time (printed by main).
+# Appends "-dirty" if the working tree has uncommitted changes.
+# ------------------------------------------------------------------
+GIT_COMMIT_HASH := $(shell git rev-parse --short=12 HEAD 2>/dev/null || echo unknown)$(shell git diff --quiet 2>/dev/null || echo -dirty)
+GIT_FLAGS = -DGIT_COMMIT_HASH=\"$(GIT_COMMIT_HASH)\"
+
+# ------------------------------------------------------------------
 # Profiling build (opt-in, does not affect the default build)
 #
 #   make profile        (or: make PROFILE=1)
@@ -36,11 +43,22 @@ $(PROF_EXEC): $(PROF_OBJS)
 # objects also depend on the headers so edits to any .H trigger a rebuild
 HDRS = $(wildcard *.H)
 
+# force rebuild of main whenever the commit/dirty state may have changed
+.git/HEAD .git/index:
+	@true
+
 %.o: %.cpp $(HDRS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -c $< -o $@
 
 %.prof.o: %.cpp $(HDRS)
 	$(CC) $(CFLAGS) $(PROFILE_FLAGS) $(LDFLAGS) -c $< -o $@
+
+# only main needs the hash define; rebuild it when HEAD/index change
+main.o: main.cpp $(HDRS) .git/HEAD .git/index
+	$(CC) $(CFLAGS) $(GIT_FLAGS) $(LDFLAGS) -c main.cpp -o $@
+
+main.prof.o: main.cpp $(HDRS) .git/HEAD .git/index
+	$(CC) $(CFLAGS) $(PROFILE_FLAGS) $(GIT_FLAGS) $(LDFLAGS) -c main.cpp -o $@
 
 .PHONY: profile clean
 profile: $(PROF_EXEC)

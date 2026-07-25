@@ -11,12 +11,18 @@
 #include "Timestepping.H"
 #include "Profiling.H"
 
+#ifndef GIT_COMMIT_HASH
+#define GIT_COMMIT_HASH "unknown"
+#endif
+
 PROFILE_DECLARE("main");
 
 int main(int argc, char* argv[]) {
 
     PROFILE_SCOPE("main");
-    
+
+    std::cout << "git commit: " << GIT_COMMIT_HASH << std::endl;
+
     // read simulation paramaters
     parameters parms = read_input_files(argc, argv);
 
