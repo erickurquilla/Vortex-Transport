@@ -6,6 +6,10 @@ plottools/*.pdf
 output
 plottools/*.mp4
 
+# Python bytecode caches
+__pycache__/
+*.pyc
+
 # profiling artifacts
 perf.data*
 perf_report.txt
