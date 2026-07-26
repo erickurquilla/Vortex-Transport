@@ -5,8 +5,8 @@ LDFLAGS = -I/usr/include/eigen3
 # ------------------------------------------------------------------
 # OpenMP (opt-in, disabled by default)
 #
-#   make ENABLE_OPENMP=1    OpenMP build (-fopenmp, defines VORTEX_USE_OPENMP)
-#   make ENABLE_OPENMP=0    serial build (default)
+#   make ENABLE_OPENMP=TRUE     OpenMP build (-fopenmp, defines VORTEX_USE_OPENMP)
+#   make ENABLE_OPENMP=FALSE    serial build (default)
 #
 # Run `make clean` when switching between the two modes, since both
 # configurations produce object files with the same names.
