@@ -2,6 +2,8 @@
 #include <vector>
 #include <thread>
 #include <cstdlib>
+#include <cstdio>
+#include <chrono>
 
 #ifdef VORTEX_USE_OPENMP
 #include <omp.h>
@@ -80,6 +82,11 @@ int main(int argc, char* argv[]) {
 
     PROFILE_SCOPE("main");
 
+    // Phase timing (steady_clock is monotonic). Markers and [TIMING] lines are
+    // greppable and help correlate perf samples with program phases.
+    const std::chrono::steady_clock::time_point time_main_start = std::chrono::steady_clock::now();
+    std::cout << "[PHASE] initialization begin" << std::endl;
+
     std::cout << "git commit: " << GIT_COMMIT_HASH << std::endl;
 
     // print OpenMP and CPU diagnostics before the main computation begins
@@ -139,6 +146,10 @@ int main(int argc, char* argv[]) {
         evolve_elements[i].evaluate_basis_in_quadrature_poits();
     }
 
+    const std::chrono::steady_clock::time_point time_init_end = std::chrono::steady_clock::now();
+    std::cout << "[PHASE] initialization end" << std::endl;
+    std::cout << "[PHASE] timestepping begin" << std::endl;
+
     // time stepping loop
     for (int a = 1; a < parms.number_time_steps + 1; ++a) {
 
@@ -166,6 +177,21 @@ int main(int argc, char* argv[]) {
             write_output(elements, 2 * parms.num_element_in_x * parms.num_element_in_y, a);
         }
     }
+
+    const std::chrono::steady_clock::time_point time_stepping_end = std::chrono::steady_clock::now();
+    std::cout << "[PHASE] timestepping end" << std::endl;
+
+    // Report phase timings. Teardown covers anything after the time-stepping
+    // loop, so init + timestepping + teardown = total exactly.
+    const std::chrono::steady_clock::time_point time_main_end = std::chrono::steady_clock::now();
+    const double init_sec     = std::chrono::duration<double>(time_init_end - time_main_start).count();
+    const double stepping_sec = std::chrono::duration<double>(time_stepping_end - time_init_end).count();
+    const double teardown_sec = std::chrono::duration<double>(time_main_end - time_stepping_end).count();
+    const double total_sec    = std::chrono::duration<double>(time_main_end - time_main_start).count();
+    std::printf("[TIMING] total_time_sec = %.6f\n", total_sec);
+    std::printf("[TIMING] init_time_sec = %.6f\n", init_sec);
+    std::printf("[TIMING] timestepping_time_sec = %.6f\n", stepping_sec);
+    std::printf("[TIMING] teardown_time_sec = %.6f\n", teardown_sec);
 
     return 0;
 }
