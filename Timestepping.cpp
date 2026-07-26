@@ -23,7 +23,7 @@ void evolve_elem(Evolve_element* evo_elemts, int n_elements) {
     // members and reads (never writes) the neighboring elements' state U,
     // which is not modified anywhere in this loop.
 #ifdef VORTEX_USE_OPENMP
-    #pragma omp parallel for default(shared) schedule(static)
+    #pragma omp parallel for default(shared) schedule(runtime)
 #endif
     for (int n = 0; n < n_elements ; ++n) {
         evo_elemts[n].compute_U_plus_minus();      // compute U on the element boundaries

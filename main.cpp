@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
 
     // Initialize elements of the array (parallelized with OpenMP)
     #ifdef VORTEX_USE_OPENMP
-    #pragma omp parallel for default(shared) schedule(static)
+    #pragma omp parallel for default(shared) schedule(runtime)
     #endif
     for (int i = 0; i < 2 * parms.num_element_in_x * parms.num_element_in_y ; ++i) {
         elements[i] = Element(i, simulation_mesh, nodes_reference_space, parms.p); // Initilize element objects and compute interior nodes coordinate in physical space
@@ -131,7 +131,7 @@ int main(int argc, char* argv[]) {
 
     // Initialize Evolve_element objects in the array evolve_elements
     #ifdef VORTEX_USE_OPENMP
-    #pragma omp parallel for default(shared) schedule(static)
+    #pragma omp parallel for default(shared) schedule(runtime)
     #endif
     for (int i = 0; i < 2 * parms.num_element_in_x * parms.num_element_in_y ; ++i) {
         // Build evolve_elements

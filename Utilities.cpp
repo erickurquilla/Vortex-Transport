@@ -67,7 +67,7 @@ void write_output(Element* elements, const int& total_num_elements, const int& s
     PROFILE_SCOPE("write_output");
 
     #ifdef VORTEX_USE_OPENMP
-    #pragma omp parallel for default(shared) schedule(static)
+    #pragma omp parallel for default(shared) schedule(runtime)
     #endif
     for (int i = 0; i < total_num_elements; ++i) {
         elements[i].write_data(step_num); // write data
