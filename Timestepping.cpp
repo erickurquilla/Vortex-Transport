@@ -2,6 +2,10 @@
 #include <cmath>
 #include <iostream>
 
+#ifdef VORTEX_USE_OPENMP
+#include <omp.h>
+#endif
+
 #include "Element.H"
 #include "Evolve.H"
 #include "Profiling.H"
@@ -13,7 +17,14 @@ PROFILE_DECLARE("rk4");
 // Compute dynamical quantites of the DG method
 void evolve_elem(Evolve_element* evo_elemts, int n_elements) {
     PROFILE_SCOPE("evolve_elem");
+
     // Compute require quantities for time evolution
+    // Safe to parallelize: iteration n writes only to evo_elemts[n]'s own
+    // members and reads (never writes) the neighboring elements' state U,
+    // which is not modified anywhere in this loop.
+#ifdef VORTEX_USE_OPENMP
+    #pragma omp parallel for default(shared) schedule(static)
+#endif
     for (int n = 0; n < n_elements ; ++n) {
         evo_elemts[n].compute_U_plus_minus();      // compute U on the element boundaries
         evo_elemts[n].compute_numerical_flux();    // compute numerical flux
