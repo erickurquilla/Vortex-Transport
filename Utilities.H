@@ -10,4 +10,9 @@ void writeToFile(const std::string& filename, const std::vector<std::string>& li
 // clean and create a directory
 void clean_create_directory(const std::string& dirname);
 
+class Element;
+
+// write output data of all elements for the given step (parallelized with OpenMP)
+void write_output(Element* elements, const int& total_num_elements, const int& step_num);
+
 #endif // UTILITIES_H

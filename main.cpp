@@ -121,8 +121,10 @@ int main(int argc, char* argv[]) {
         elements[i].build_mass_matrix_inverse(inverse_mass_matrix); // Build mass matrix
         elements[i].build_stiffness_matrix(stiffness_matrix); // builds stiffness matrix from referece space to physical space for each element
         elements[i].initialize_hydrodinamics(parms.U_initialization_type, gauss_integral_area); //Initialize hidrodynamic quanities
-        elements[i].write_data(0); //write data
     }
+
+    // Write data for step 0 (parallelized with OpenMP)
+    write_output(elements, 2 * parms.num_element_in_x * parms.num_element_in_y, 0);
 
     // Define an array of Evolve_elements members of the class Evolve_element
     Evolve_element* evolve_elements = new Evolve_element[  2 * parms.num_element_in_x * parms.num_element_in_y  ];
@@ -160,14 +162,8 @@ int main(int argc, char* argv[]) {
             // Create the output/step_a directory
             clean_create_directory("output/step_" + std::to_string(a));        
             std::cout << "Writing Step : " << a << std::endl;
-            // loop over elements
-            #ifdef VORTEX_USE_OPENMP
-            #pragma omp parallel for default(shared) schedule(static)
-            #endif
-            for (int i = 0; i < 2 * parms.num_element_in_x * parms.num_element_in_y ; ++i) {
-                    // write data
-                    elements[i].write_data(a); 
-            }
+            // write data of all elements (parallelized with OpenMP)
+            write_output(elements, 2 * parms.num_element_in_x * parms.num_element_in_y, a);
         }
     }
 
