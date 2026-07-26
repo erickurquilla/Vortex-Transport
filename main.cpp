@@ -1,5 +1,17 @@
 #include <iostream>
 #include <vector>
+#include <thread>
+#include <cstdlib>
+
+#ifdef VORTEX_USE_OPENMP
+#include <omp.h>
+#endif
+
+// Sanity check: the build system must supply OpenMP compiler support
+// (e.g. -fopenmp) whenever it requests the OpenMP code paths.
+#if defined(VORTEX_USE_OPENMP) && !defined(_OPENMP)
+#error "VORTEX_USE_OPENMP is defined, but the compiler was not configured with OpenMP support."
+#endif
 
 #include "Parameters.H"
 #include "Utilities.H"
@@ -17,11 +29,59 @@
 
 PROFILE_DECLARE("main");
 
+// Print the value of an environment variable, or "not set" if it is undefined.
+static void print_env_var(const char* name) {
+    const char* value = std::getenv(name);
+    std::string label = std::string(name) + ":";
+    if (label.size() < 27) label.append(27 - label.size(), ' ');
+    std::cout << label << (value ? value : "not set") << std::endl;
+}
+
+// Print OpenMP and CPU configuration diagnostics once at program startup.
+static void print_openmp_diagnostics() {
+    std::cout << "==================================================" << std::endl;
+    std::cout << "OpenMP and CPU configuration" << std::endl;
+    std::cout << "==================================================" << std::endl;
+
+#ifdef VORTEX_USE_OPENMP
+    std::cout << "OpenMP requested by build: yes" << std::endl;
+    std::cout << "OpenMP compiler support:   yes" << std::endl;
+    std::cout << "OpenMP version:            " << _OPENMP << std::endl;
+    std::cout << "Hardware concurrency:      " << std::thread::hardware_concurrency() << std::endl;
+    std::cout << "OpenMP processors:         " << omp_get_num_procs() << std::endl;
+    std::cout << "OpenMP maximum threads:    " << omp_get_max_threads() << std::endl;
+
+    // Probe the runtime with a real parallel region; report from one thread only.
+    #pragma omp parallel
+    {
+        #pragma omp single
+        {
+            std::cout << "OpenMP active threads:     " << omp_get_num_threads() << std::endl;
+        }
+    }
+    print_env_var("OMP_NUM_THREADS");
+    print_env_var("OMP_PROC_BIND");
+    print_env_var("OMP_PLACES");
+    print_env_var("OMP_DYNAMIC");
+    print_env_var("OMP_SCHEDULE");
+    print_env_var("OMP_MAX_ACTIVE_LEVELS");
+#else
+    std::cout << "OpenMP requested by build: no" << std::endl;
+    std::cout << "Execution mode:            serial" << std::endl;
+    std::cout << "Hardware concurrency:      " << std::thread::hardware_concurrency() << std::endl;
+#endif
+
+    std::cout << "==================================================" << std::endl;
+}
+
 int main(int argc, char* argv[]) {
 
     PROFILE_SCOPE("main");
 
     std::cout << "git commit: " << GIT_COMMIT_HASH << std::endl;
+
+    // print OpenMP and CPU diagnostics before the main computation begins
+    print_openmp_diagnostics();
 
     // read simulation paramaters
     parameters parms = read_input_files(argc, argv);

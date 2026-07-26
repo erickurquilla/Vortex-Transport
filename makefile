@@ -3,6 +3,21 @@ CFLAGS = -std=c++11 -Wall
 LDFLAGS = -I/usr/include/eigen3
 
 # ------------------------------------------------------------------
+# OpenMP (opt-in, disabled by default)
+#
+#   make ENABLE_OPENMP=1    OpenMP build (-fopenmp, defines VORTEX_USE_OPENMP)
+#   make ENABLE_OPENMP=0    serial build (default)
+#
+# Run `make clean` when switching between the two modes, since both
+# configurations produce object files with the same names.
+# ------------------------------------------------------------------
+ENABLE_OPENMP ?= FALSE
+ifeq ($(ENABLE_OPENMP),TRUE)
+CFLAGS  += -fopenmp -DVORTEX_USE_OPENMP
+LDFLAGS += -fopenmp
+endif
+
+# ------------------------------------------------------------------
 # Git commit hash baked into the binary at compile time (printed by main).
 # Appends "-dirty" if the working tree has uncommitted changes.
 # ------------------------------------------------------------------
