@@ -1,0 +1,35 @@
+// lagrange polinomial order
+p=3
+
+// physical domain
+domain_x=10.0 //cm
+domain_y=10.0 //cm
+
+// number of elements
+num_element_in_x=256
+num_element_in_y=256
+
+// grid perturbation parameter 
+perturb_grid=0
+
+// gauss integration
+integration_order=6
+
+// simulation time
+simulation_time=1e-8
+
+// number of time steps
+number_time_steps=10
+
+// write data
+write_every_steps=10
+
+// initialization type of hidrodynamics state U
+// 0 : direct interpolation
+// 1 : least squere projection
+U_initialization_type=0
+
+// time stepping method
+// 0 : forward euler
+// 1 : rk4
+stepping_method=1
