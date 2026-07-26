@@ -6,6 +6,12 @@
 #   scripts/profile.sh                          # runs ./Vortex-Transport-prof input_files/input
 #   scripts/profile.sh ./Vortex-Transport-prof my_input
 #
+# OpenMP configuration: set OMP_* environment variables on the command line
+# and they are passed through to the profiled binary unchanged, e.g.:
+#   OMP_NUM_THREADS=8 OMP_PROC_BIND=close OMP_PLACES=cores OMP_DYNAMIC=false \
+#   OMP_SCHEDULE=static OMP_MAX_ACTIVE_LEVELS=1 scripts/profile.sh
+# The script prints the values it runs with so every profile is reproducible.
+#
 # Run from the repository root. Build the profiling binary first:
 #   make profile ENABLE_OPENMP=TRUE     # profile the OpenMP build (what production runs use)
 #   make profile                        # profile the serial build
@@ -113,6 +119,16 @@ else
     echo "         If you meant to profile the OpenMP code, rebuild first:" >&2
     echo "             make clean && make profile ENABLE_OPENMP=TRUE" >&2
 fi
+
+# ---------------------------------------------------------------------------
+# OpenMP environment: values set on the command line (or exported in the
+# shell) are inherited by the profiled binary. Print them so the recorded
+# profile is reproducible; unset means the libgomp default applies.
+# ---------------------------------------------------------------------------
+echo "OpenMP environment for this profile:"
+for var in OMP_NUM_THREADS OMP_PROC_BIND OMP_PLACES OMP_DYNAMIC OMP_SCHEDULE OMP_MAX_ACTIVE_LEVELS OMP_WAIT_POLICY; do
+    printf '  %-22s %s\n' "$var:" "${!var:-not set (libgomp default)}"
+done
 
 # ---------------------------------------------------------------------------
 # record: -g captures call graphs with frame-pointer unwinding. This works
