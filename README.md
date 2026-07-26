@@ -2,7 +2,7 @@
 
 2D nodal discontinuous Galerkin (DG) solver for the compressible Euler equations on a structured triangulation, configured for the classic isentropic vortex transport problem.
 
-The conserved state is \(\mathbf{U} = (\rho, \rho u, \rho v, \rho E)\). Each triangular element stores nodal degrees of freedom for a Lagrange basis of order `p` on the reference triangle with vertices \((0,0)\), \((1,0)\), \((0,1)\). Interface coupling uses a Roe numerical flux (`numerical_flux` in `Numericalflux.cpp`). Time integration is explicit forward Euler or classical RK4.
+The conserved state is $`\mathbf{U} = (\rho, \rho u, \rho v, \rho E)`$. Each triangular element stores nodal degrees of freedom for a Lagrange basis of order `p` on the reference triangle with vertices $(0,0)$, $(1,0)$, $(0,1)$. Interface coupling uses a Roe numerical flux (`numerical_flux` in `Numericalflux.cpp`). Time integration is explicit forward Euler or classical RK4.
 
 ---
 
@@ -10,13 +10,13 @@ The conserved state is \(\mathbf{U} = (\rho, \rho u, \rho v, \rho E)\). Each tri
 
 **What the code does today**
 
-- Solves the 2D compressible Euler equations with \(\gamma = 1.4\) (hardcoded).
+- Solves the 2D compressible Euler equations with $\gamma = 1.4$ (hardcoded).
 - Nodal DG on triangles: mass and stiffness operators built once in reference space (`Preevolve.cpp`), then mapped to physical space per element via the affine Jacobian (`Element::build_jacobians`, `build_mass_matrix_inverse`, `build_stiffness_matrix`).
-- Structured mesh: each Cartesian cell is split into two triangles (types 0 / 1: right-angle vertex down / up). Domain is centered at the origin, \([-\texttt{domain\_x}/2, +\texttt{domain\_x}/2] \times [-\texttt{domain\_y}/2, +\texttt{domain\_y}/2]\).
+- Structured mesh: each Cartesian cell is split into two triangles (types 0 / 1: right-angle vertex down / up). Domain is centered at the origin, $`[-\mathrm{domain\_x}/2, +\mathrm{domain\_x}/2] \times [-\mathrm{domain\_y}/2, +\mathrm{domain\_y}/2]`$.
 - Neighbor connectivity wraps at the outer edges (periodic-style boundaries); see `Meshgeneration.cpp`.
 - Optional interior-node grid perturbation via `perturb_grid` (boundary nodes stay fixed).
-- Isentropic vortex initial condition, hardcoded in `Element::initialize_hydrodinamics` (parameters such as \(\varepsilon=0.3\), \(M_\infty=0.5\), \(U_\infty=V_\infty=1/\sqrt{2}\), center \((0,0)\)).
-- Two ways to place the IC on the DG nodes: direct nodal interpolation (`U_initialization_type=0`) or \(L^2\) / least-squares projection (`U_initialization_type=1`).
+- Isentropic vortex initial condition, hardcoded in `Element::initialize_hydrodinamics` (parameters such as $\varepsilon=0.3$, $`M_\infty=0.5`$, $`U_\infty=V_\infty=1/\sqrt{2}`$, center $(0,0)$).
+- Two ways to place the IC on the DG nodes: direct nodal interpolation (`U_initialization_type=0`) or $L^2$ / least-squares projection (`U_initialization_type=1`).
 - Explicit time stepping: forward Euler (`stepping_method=0`) or RK4 (`stepping_method=1`).
 - Opt-in OpenMP over element-level loops (`ENABLE_OPENMP=TRUE`), with `schedule(runtime)` so `OMP_SCHEDULE` is honored.
 - Opt-in `perf` + instrumented timing build (`make profile`); archived profile snapshots live under `performance_history/`.
@@ -25,8 +25,8 @@ The conserved state is \(\mathbf{U} = (\rho, \rho u, \rho v, \rho E)\). Each tri
 **What it does not do (current limits)**
 
 - Only polynomial orders `p = 0,1,2,3` (hardcoded `switch` in `Lagrangebasis.cpp`).
-- Only the isentropic vortex IC; vortex constants and \(\gamma\) are not input-file parameters.
-- No adaptive / CFL-based \(\Delta t\): `time_step = simulation_time / number_time_steps`.
+- Only the isentropic vortex IC; vortex constants and $\gamma$ are not input-file parameters.
+- No adaptive / CFL-based $\Delta t$: `time_step = simulation_time / number_time_steps`.
 - No MPI / distributed memory.
 - Default `make` binary is compiled without `-O2` (optimization is enabled on the profiling binary only).
 - Quadrature `integration_order` must be in `0..19` (lookup tables in `Quadraturerule.cpp`).
@@ -91,25 +91,25 @@ Exactly one CLI argument is required (`Parameters.cpp`). On start, the program p
 | Key | Meaning |
 |---|---|
 | `p` | Lagrange polynomial order (supported: 0–3) |
-| `domain_x`, `domain_y` | Full domain width/height (cm in the sample comments); mesh spans \(\pm\) half of each |
+| `domain_x`, `domain_y` | Full domain width/height (cm in the sample comments); mesh spans $\pm$ half of each |
 | `num_element_in_x`, `num_element_in_y` | Cartesian cells; total triangles = `2 * num_element_in_x * num_element_in_y` |
 | `perturb_grid` | Interior-node mesh perturbation strength (0 = Cartesian) |
 | `integration_order` | Index into Gauss quadrature tables (0–19) for line and area integrals |
-| `simulation_time` | Final physical time \(T\) |
-| `number_time_steps` | Number of steps \(N\); \(\Delta t = T/N\) (computed, not read as its own key) |
+| `simulation_time` | Final physical time $T$ |
+| `number_time_steps` | Number of steps $N$; $\Delta t = T/N$ (computed, not read as its own key) |
 | `write_every_steps` | Write `output/step_<k>/` when `k % write_every_steps == 0` (plus always step 0) |
 | `U_initialization_type` | `0` direct interpolation; `1` least-squares projection |
 | `stepping_method` | `0` forward Euler; `1` RK4 |
 
 Shipped inputs:
 
-- `input_files/input` — `p=3`, \(8\times8\) cells (128 triangles), \(T \approx 14.14213562373\), 10000 RK4 steps, write every 250. That \(T\) equals \(10\sqrt{2}\), i.e. one diagonal transit of a vortex with speed \(1/\sqrt{2}\) across a side-10 domain (the usual “return to start” check under periodic wrap).
-- `input_files/input_omp_performance` — large mesh (`256×256` cells), tiny \(T\) and 10 steps; intended for OpenMP / profiling throughput tests, not a full vortex period.
+- `input_files/input` — `p=3`, $8\times8$ cells (128 triangles), $T \approx 14.14213562373$, 10000 RK4 steps, write every 250. That $T$ equals $10\sqrt{2}$, i.e. one diagonal transit of a vortex with speed $1/\sqrt{2}$ across a side-10 domain (the usual “return to start” check under periodic wrap).
+- `input_files/input_omp_performance` — large mesh (`256×256` cells), tiny $T$ and 10 steps; intended for OpenMP / profiling throughput tests, not a full vortex period.
 
 ### Program flow (`main.cpp`)
 
 1. **Initialize** — read parameters; `generate_mesh` (writes `grid/element_*.txt`); build line/area Gauss rules; reference nodes; reference inverse mass matrix and stiffness matrix; construct each `Element` (Jacobians, physical mass/stiffness, IC); write step 0; construct each `Evolve_element` and pre-evaluate basis values at face quadrature points.
-2. **Time loop** — for `a = 1 .. number_time_steps`: call `forward_euler` or `rk4`. Each stage of those methods calls `evolve_elem`, which for every element computes face states \(U^\pm\), Roe flux, face flux integral, stiffness vector, residual \(\mathbf{R} = \mathbf{S} - \int \hat{\mathbf{F}}\), then \(\dot{\mathbf{U}} = M^{-1}\mathbf{R}\). After the step, update nodal \(\mathbf{U}\) and recompute the Euler flux \(\mathbf{F}(\mathbf{U})\).
+2. **Time loop** — for `a = 1 .. number_time_steps`: call `forward_euler` or `rk4`. Each stage of those methods calls `evolve_elem`, which for every element computes face states $U^\pm$, Roe flux, face flux integral, stiffness vector, residual $`\mathbf{R} = \mathbf{S} - \int \hat{\mathbf{F}}`$, then $`\dot{\mathbf{U}} = M^{-1}\mathbf{R}`$. After the step, update nodal $`\mathbf{U}`$ and recompute the Euler flux $`\mathbf{F}(\mathbf{U})`$.
 3. **Output** — when due, `clean_create_directory("output/step_<a>")` then `write_output` → one `element_<id>.txt` per triangle. Step 0 also writes `JMS_element_*.txt` (Jacobians, inverse mass, stiffness, outward unit normals).
 4. **Timing** — prints greppable `[PHASE]` / `[TIMING]` lines for init, timestepping, teardown, and total wall time.
 
@@ -134,11 +134,11 @@ Each run recreates `output/` and `grid/` from scratch (`clean_create_directory` 
 | `main.cpp` | Driver: diagnostics, init, time loop, phase timings |
 | `Parameters.{H,cpp}` | `parameters` struct + `read_input_files` |
 | `Meshgeneration.{H,cpp}` | Structured triangulation, neighbor wrap, reference nodes, `grid/` I/O |
-| `Element.{H,cpp}` | Per-element geometry, operators, IC, state \(\mathbf{U}\)/\(\mathbf{F}\), write |
-| `Lagrangebasis.{H,cpp}` | \(\phi_i(\xi,\eta)\), \(\nabla\phi_i\), reference→physical map (`p≤3`) |
+| `Element.{H,cpp}` | Per-element geometry, operators, IC, state $`\mathbf{U}`$ / $`\mathbf{F}`$, write |
+| `Lagrangebasis.{H,cpp}` | $`\phi_i(\xi,\eta)`$, $`\nabla\phi_i`$, reference→physical map (`p≤3`) |
 | `Quadraturerule.{H,cpp}` | Gauss line/area rules vs `integration_order` |
-| `Preevolve.{H,cpp}` | Reference \(M^{-1}\) (via Eigen) and reference stiffness |
-| `Evolve.{H,cpp}` | Per-element DG residual / \(\dot{\mathbf{U}}\) pipeline |
+| `Preevolve.{H,cpp}` | Reference $M^{-1}$ (via Eigen) and reference stiffness |
+| `Evolve.{H,cpp}` | Per-element DG residual / $`\dot{\mathbf{U}}`$ pipeline |
 | `Numericalflux.{H,cpp}` | Roe flux (in-place, no heap alloc on the hot path) |
 | `Timestepping.{H,cpp}` | `evolve_elem`, `forward_euler`, `rk4` |
 | `Utilities.{H,cpp}` | File/dir helpers, parallel `write_output` |
@@ -162,10 +162,10 @@ Enabled only when built with `ENABLE_OPENMP=TRUE` (defines `VORTEX_USE_OPENMP` a
 |---|---|
 | `main.cpp` | Element construction / Jacobians / operators / IC |
 | `main.cpp` | `Evolve_element` construction + `evaluate_basis_in_quadrature_poits` |
-| `Timestepping.cpp` → `evolve_elem` | Per-element DG residual / \(\dot U\) (hot path each RK stage) |
+| `Timestepping.cpp` → `evolve_elem` | Per-element DG residual / $\dot U$ (hot path each RK stage) |
 | `Utilities.cpp` → `write_output` | Per-element `write_data` |
 
-**Still serial:** mesh generation, reference-space operator assembly, and the RK4/Euler loops that advance nodal \(\mathbf{U}\) and refresh \(\mathbf{F}\) after `evolve_elem`.
+**Still serial:** mesh generation, reference-space operator assembly, and the RK4/Euler loops that advance nodal $`\mathbf{U}`$ and refresh $`\mathbf{F}`$ after `evolve_elem`.
 
 At startup, OpenMP builds print `_OPENMP`, `omp_get_max_threads()`, a probed active thread count, and the environment variables below.
 
@@ -253,13 +253,13 @@ python3 plottools/hydrodynamicstateplot.py    # → plottools/step_*.pdf + anima
 python3 plottools/l2stateerror.py             # prints L2 state error, first dump vs last
 ```
 
-Needs `numpy`, `pandas`, `matplotlib`; the animation path also needs `ffmpeg`. `l2stateerror.py` currently hardcodes `p = 3` and a domain-normalization factor consistent with the default \(10\times10\) setup.
+Needs `numpy`, `pandas`, `matplotlib`; the animation path also needs `ffmpeg`. `l2stateerror.py` currently hardcodes `p = 3` and a domain-normalization factor consistent with the default $10\times10$ setup.
 
 ---
 
 ## Known limitations / caveats
 
-- **Hardcoded physics constants** — \(\gamma\), vortex amplitude/Mach/freestream, and vortex center live in `Element::initialize_hydrodinamics` and are duplicated in the Euler flux updates inside `Timestepping.cpp` / `Numericalflux.cpp`.
+- **Hardcoded physics constants** — $\gamma$, vortex amplitude/Mach/freestream, and vortex center live in `Element::initialize_hydrodinamics` and are duplicated in the Euler flux updates inside `Timestepping.cpp` / `Numericalflux.cpp`.
 - **Supported `p` and quadrature** — see “Key features”; unsupported values `exit` with an error message.
 - **Default build is unoptimized** — use `Vortex-Transport-prof` or add your own `-O2`/`-O3` if comparing wall times for production-style runs.
 - **OpenMP coverage is partial** — residual evaluation is parallel; RK stage state updates are not.
