@@ -29,6 +29,7 @@
 
 PROFILE_DECLARE("main");
 
+#ifdef VORTEX_USE_OPENMP
 // Print the value of an environment variable, or "not set" if it is undefined.
 static void print_env_var(const char* name) {
     const char* value = std::getenv(name);
@@ -36,6 +37,7 @@ static void print_env_var(const char* name) {
     if (label.size() < 27) label.append(27 - label.size(), ' ');
     std::cout << label << (value ? value : "not set") << std::endl;
 }
+#endif
 
 // Print OpenMP and CPU configuration diagnostics once at program startup.
 static void print_openmp_diagnostics() {
