@@ -27,7 +27,12 @@ GIT_FLAGS = -DGIT_COMMIT_HASH=\"$(GIT_COMMIT_HASH)\"
 # ------------------------------------------------------------------
 # Profiling build (opt-in, does not affect the default build)
 #
-#   make profile        (or: make PROFILE=1)
+#   make profile ENABLE_OPENMP=TRUE     profile the OpenMP build
+#   make profile                        profile the serial build
+#
+# NOTE: ENABLE_OPENMP is independent of `profile`. A plain `make profile`
+# produces a SERIAL binary; if production runs use OpenMP, profile with
+# ENABLE_OPENMP=TRUE (and `make clean` first when switching modes).
 #
 # builds a separate executable `Vortex-Transport-prof` from separate
 # object files (*.prof.o), compiled with:

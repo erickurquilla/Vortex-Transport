@@ -94,6 +94,7 @@ public:
     void register_thread(ThreadState* state) {
         std::lock_guard<std::mutex> lock(mutex_);
         live_threads_.push_back(state);
+        ++threads_seen_;
     }
 
     void merge_and_unregister(ThreadState* state); // defined below ThreadState
@@ -101,7 +102,7 @@ public:
     ~GlobalRegistry() { report(); }
 
 private:
-    GlobalRegistry() : program_start_(std::chrono::steady_clock::now()) {}
+    GlobalRegistry() : program_start_(std::chrono::steady_clock::now()), threads_seen_(0) {}
     GlobalRegistry(const GlobalRegistry&);            // non-copyable (C++11-compatible)
     GlobalRegistry& operator=(const GlobalRegistry&);
 
@@ -165,6 +166,7 @@ private:
     std::mutex mutex_;
     std::map<std::string, ProfileEntry> merged_;   // declared names + data from finished threads
     std::vector<ThreadState*> live_threads_;
+    long long threads_seen_;                       // threads that ran at least one PROFILE_SCOPE
 };
 
 // Per-thread accumulator. Created lazily on each thread's first timed scope,
@@ -207,9 +209,11 @@ inline void GlobalRegistry::report() {
     // snapshot: declared + finished-thread data, plus live threads (at exit
     // those should be quiescent; only main typically remains)
     std::map<std::string, ProfileEntry> total;
+    long long threads_seen;
     {
         std::lock_guard<std::mutex> lock(mutex_);
         total = merged_;
+        threads_seen = threads_seen_;
         for (size_t t = 0; t < live_threads_.size(); ++t) {
             typedef std::unordered_map<std::string, ProfileEntry>::const_iterator Iter;
             const std::unordered_map<std::string, ProfileEntry>& e = live_threads_[t]->entries();
@@ -225,6 +229,16 @@ inline void GlobalRegistry::report() {
     std::fprintf(stderr, "peak memory: %s | %s\n",
                  proc_status_line("VmHWM").c_str(),   // peak resident set size
                  proc_status_line("VmPeak").c_str()); // peak virtual memory
+    std::fprintf(stderr, "profiled threads: %lld\n", threads_seen);
+    if (threads_seen > 1) {
+        std::fprintf(stderr,
+            "NOTE: multithreaded run. Times are summed across threads, so self/incl\n"
+            "      seconds can exceed wall time. A scope that contains an OpenMP\n"
+            "      parallel region (e.g. evolve_elem) also absorbs the master thread's\n"
+            "      wait at the implicit barrier into its SELF time: a large self time\n"
+            "      there means load imbalance or too little work per region, not that\n"
+            "      the function body itself is expensive. Use perf for the real split.\n");
+    }
     std::fprintf(stderr, "\n");
 
     // Table 1: sorted by SELF time — "where is CPU time actually spent".

@@ -3,11 +3,15 @@
 # Profile Vortex-Transport with linux perf.
 #
 # Usage:
-#   scripts/profile.sh                          # runs ./Vortex-Transport-prof input
+#   scripts/profile.sh                          # runs ./Vortex-Transport-prof input_files/input
 #   scripts/profile.sh ./Vortex-Transport-prof my_input
 #
 # Run from the repository root. Build the profiling binary first:
-#   make profile        (or: make PROFILE=1)
+#   make profile ENABLE_OPENMP=TRUE     # profile the OpenMP build (what production runs use)
+#   make profile                        # profile the serial build
+# Run `make clean` first when switching between the two, and note that
+# ENABLE_OPENMP is a separate knob: plain `make profile` silently builds a
+# SERIAL binary. This script warns if the binary it is given has no OpenMP.
 #
 # Outputs (written to the current directory):
 #   perf.data        raw samples          (interactive: perf report -i perf.data)
@@ -34,15 +38,32 @@
 #   cargo install inferno                                    # inferno-collapse-perf / inferno-flamegraph
 #   git clone https://github.com/brendangregg/FlameGraph     # stackcollapse-perf.pl / flamegraph.pl (add to PATH)
 #
-# Complementary hardware counters (not covered by this script):
-#   perf stat -e cycles,instructions,cache-misses,page-faults ./Vortex-Transport-prof input
+# Complementary counters (not covered by this script):
+#   perf stat ./Vortex-Transport-prof input_files/input
+# The "CPUs utilized" line is the quickest OpenMP sanity check: it should be
+# close to OMP_NUM_THREADS if threads are busy. On WSL2 hardware counters
+# (cycles, instructions, cache-misses) are usually <not supported>; perf then
+# samples on task-clock, which is fine for time-based profiles.
+#
+# Reading OpenMP profiles:
+#   - Outlined parallel regions show up as "func(...) [clone ._omp_fn.N]".
+#     Worker-thread samples root at gomp_thread_start/start_thread, NOT at
+#     main: only the master thread's chain goes through GOMP_parallel back to
+#     the caller. That is inherent to OpenMP thread pools, not a perf bug.
+#   - Time in gomp_team_barrier_wait_end / do_wait / do_spin is threads
+#     SPINNING at barriers (idle CPU burn, load imbalance or too little work
+#     per region) - it is not real work in the function that contains the
+#     parallel loop. Resolving these names needs libgomp debug symbols
+#     (libgomp1-dbgsym); this script warns if they are missing.
+#   - To measure compute without the spin noise, rerun with
+#     OMP_WAIT_POLICY=passive (threads sleep instead of spinning).
 # ---------------------------------------------------------------------------
 
 set -euo pipefail
 
 BINARY="${1:-./Vortex-Transport-prof}"
 shift || true
-ARGS=("${@:-input}")
+ARGS=("${@:-input_files/input}")
 
 # ---------------------------------------------------------------------------
 # locate perf: PATH first, then the versioned linux-tools binaries (WSL2 case,
@@ -68,16 +89,44 @@ echo "using perf: $PERF ($($PERF --version))"
 
 if [ ! -x "$BINARY" ]; then
     echo "ERROR: '$BINARY' not found or not executable." >&2
-    echo "Build it first with:  make profile" >&2
+    echo "Build it first with:  make profile ENABLE_OPENMP=TRUE" >&2
     exit 1
 fi
 
 # ---------------------------------------------------------------------------
-# record: -g captures call graphs (works well because the profiling build
-# uses -fno-omit-frame-pointer), -F 499 samples ~499 times/second
+# OpenMP sanity checks: is this the parallel binary, and can libgomp's
+# internal barrier/spin functions be resolved to names in the report?
+# ---------------------------------------------------------------------------
+GOMP_PATH="$(ldd "$BINARY" 2>/dev/null | awk '/libgomp/ {print $3}')"
+if [ -n "$GOMP_PATH" ]; then
+    echo "binary is an OpenMP build (links $GOMP_PATH); perf records all OpenMP threads"
+    BUILD_ID="$(readelf -n "$GOMP_PATH" 2>/dev/null | awk '/Build ID/ {print $NF}')"
+    DEBUG_FILE="/usr/lib/debug/.build-id/${BUILD_ID:0:2}/${BUILD_ID:2}.debug"
+    if [ -n "$BUILD_ID" ] && [ ! -f "$DEBUG_FILE" ]; then
+        echo "WARNING: no debug symbols for libgomp (missing $DEBUG_FILE)." >&2
+        echo "         Barrier/spin-wait time will show as raw hex addresses in libgomp.so.1" >&2
+        echo "         instead of names like gomp_team_barrier_wait_end. Install the" >&2
+        echo "         libgomp1-dbgsym package matching 'dpkg -l libgomp1' to fix this." >&2
+    fi
+else
+    echo "WARNING: '$BINARY' is a SERIAL build (does not link libgomp)." >&2
+    echo "         If you meant to profile the OpenMP code, rebuild first:" >&2
+    echo "             make clean && make profile ENABLE_OPENMP=TRUE" >&2
+fi
+
+# ---------------------------------------------------------------------------
+# record: -g captures call graphs with frame-pointer unwinding. This works
+# here because the profiling build uses -fno-omit-frame-pointer and Ubuntu
+# 24.04+ system libraries (libgomp, libc) are built with frame pointers too;
+# --call-graph dwarf would only cost ~10x more perf.data for the same chains.
+# -F 499 samples ~499 times/second PER THREAD (perf follows all threads the
+# child spawns, so no -a needed).
 # ---------------------------------------------------------------------------
 echo "recording: $PERF record -g -F 499 -o perf.data -- $BINARY ${ARGS[*]}"
+RECORD_START=$(date +%s.%N)
 "$PERF" record -g -F 499 -o perf.data -- "$BINARY" "${ARGS[@]}"
+RECORD_END=$(date +%s.%N)
+echo "program wall time under perf: $(echo "$RECORD_END - $RECORD_START" | bc) s (compare against a plain run to gauge perf overhead)"
 
 # ---------------------------------------------------------------------------
 # text report
